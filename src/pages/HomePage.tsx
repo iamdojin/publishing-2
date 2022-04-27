@@ -1,53 +1,84 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
+import { CategoryButton } from '../components/CategoryButton';
+import { MovieCard } from '../components/MovieCard';
 import { TextField } from '../components/TextField';
+import popularImg from '../assets/images/popcorn.png'
+import nowPlayingImg from '../assets/images/seats.jpeg'
 
-export const HomePage = () => {
-  return <div className="m-4 space-y-14">
-    <div className="space-y-4">
-      <div className="text-2xl font-bold">NEW</div>
-      <img src="https://fashionmagazine.com/wp-content/uploads/2016/10/national-cat-day-memes.png" alt="" 
-      className="w-full h-72 object-cover rounded-2xl"
-      />
-      <div></div>
-    </div> 
-    
-    <div className="space-y-4">
-      <div className="text-2xl font-bold">CATEGORY</div>
+const API_KEY = '2eeb856217b288ecdb1aa544e2204095';
 
-      <div className="flex space-x-10">
+export type Category ={
+  id: number;
+  label: string;
+  url: string;
+  image: string;
+};
 
-        <div>
-          <img src="https://www.pngitem.com/pimgs/m/370-3708742_memes-cat-sunglasses-cat-meme-hd-png-download.png"
-          alt=""
-          className="w-20 h-20 object-cover rounded-full"/>
-          <div className="text-center text-xl">하나</div>
+const CATEGORY_LIST = [
+  {id: 0, label:'인기영화', url:'/popular', image: popularImg},
+  {id: 1, label:'현재 상영작', url:'/now_playing', image: nowPlayingImg},
+  ];
+
+export type Movie = {
+  id: number;
+  title: string;
+  overview: string;
+  poster_path: string;
+  vote_average: number;
+ };
+
+
+ export const HomePage = () => {
+  const [isLoading, setIsLoading] = useState(true);
+  const [movies, setMovies] = useState<Movie[]>([]);
+  const [categoryIndex, setCategoryIndex] = useState(0);
+
+  const setCategory = (index:number) => {
+    setCategoryIndex(index);
+  }
+
+  const getData = async (categoryIndex:number) => {
+    const url = `https://api.themoviedb.org/3/movie${CATEGORY_LIST[categoryIndex].url}?api_key=${API_KEY}&language=ko-KR&page=1`;
+    const response = await fetch(url);
+    if (response.status === 200) {
+      const data = await response.json();
+
+      setMovies(data.results);
+    } else {
+      throw new Error("데이터를 받아오지 못했습니다.");
+    }
+    setIsLoading(false);
+  }
+
+  useEffect(() => {
+    getData(categoryIndex);
+  }, [categoryIndex]);
+
+
+  return (
+    <div className="m-4 space-y-10">
+      <div className="className=">
+        <div className="space-y-4">
+          <div className="text-2xl font-bold">New</div>
+          <img
+            src="https://source.unsplash.com/random"
+            alt=""
+            className="w-full h-72 object-cover rounded-2xl"
+          />
         </div>
-
-        <div>
-          <img src="https://www.pngitem.com/pimgs/m/370-3708742_memes-cat-sunglasses-cat-meme-hd-png-download.png"
-          alt=""
-          className="w-20 h-20 object-cover rounded-full"/>
-          <div className="text-center text-xl">두울</div>
-        </div>
-
-        <div>
-          <img src="https://www.pngitem.com/pimgs/m/370-3708742_memes-cat-sunglasses-cat-meme-hd-png-download.png"
-          alt=""
-          className="w-20 h-20 object-cover rounded-full"/>
-          <div className="text-center text-xl">세엣</div>
-        </div>
-
-        <div>
-          <img src="https://www.pngitem.com/pimgs/m/370-3708742_memes-cat-sunglasses-cat-meme-hd-png-download.png"
-          alt=""
-          className="w-20 h-20 object-cover rounded-full"/>
-          <div className="text-center text-xl">네엣</div>
-        </div>
-
       </div>
-    </div>
+    
+      <div>
+        <div className="space-y-4">
+          <div className="text-2xl font-bold">Category</div>
 
-  <div className="space-y-4">
+        <div className="flex space-x-3">
+          {CATEGORY_LIST.map((data) => <CategoryButton key={data.id} category={data} onClick={setCategory} isSelected={data.id === categoryIndex}/>)}
+          </div>
+        </div>
+      </div>
+
+  {/* <div className="space-y-4">
     <div className="text-2xl font-bold">LIST</div>
 
     <div className="py-5 px-5 border border-gray-200 border-2 space-y-4 h-1/2 rounded-md">
@@ -66,56 +97,39 @@ export const HomePage = () => {
         <div className="rounded-md text-2xl text-center text-white font-medium bg-gray-800 px-6 py-4">Button</div>
       </div>
     </div>
-  </div>
+  </div> */}
 
- <div className="space-y-4">
-   <div className="text-2xl font-bold">LIST</div>
-   <div className="flex space-x-6">
-     <img src="https://i.pinimg.com/564x/1d/83/a6/1d83a6d88d8be5b041a9a98fd5048311.jpg"
-          alt=""
-          className="w-32 h-44 object-cover rounded-3xl"/>
-     <div className="space-y-3">
-       <p className="font-bold text-xl">식당이름</p>
-       <p className="font-semibold text-lg text-gray-600">말이 필요 없는 서울 최고의 <br/>식당 중 하나</p>
-       <p className="text-gray-300">서울시 강남구 청담동</p>
+
+<div className="text-2xl font-bold mb-4">Today's Special</div>
+    
+    {!isLoading && movies.map((movie) =>(
+       <MovieCard key={movie.id} movie={movie} />
+       ))}
+
+     <div className="flex space-x-3">
+       <div>
+         <img src="https://images.unsplash.com/photo-1512621776951-a57141f2eefd?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxzZWFyY2h8MTF8fGZvb2R8ZW58MHx8MHx8&auto=format&fit=crop&w=600&q=60" 
+         alt=""
+         className="w-full h-30 object-cover rounded-xl"
+         />
+         <div className="mt-4">
+           <div className="text-lg font-semibold">52번가 샐러드</div>
+           <div className="text-sm text-gray-500"> 
+           서울 서대문구 이화여대길 52-15
+           <div className="text-sm text-gray-500">
+           02-1234-5678
+           <div className="text-sm text-gray-500">
+             Mon-SAT 9:00 AM - 9:00 PM 
+           </div>
+           <div className="m-4">
+           <div className="bg-gray-800 rounded-md text-white text-center py-2.5 px-4">네이버 지도로 길찾기</div>
+           </div>
+           </div>
+           </div>
+
+         </div>
+       </div>
      </div>
    </div>
-   <div className="flex space-x-6">
-     <img src="https://i.pinimg.com/564x/1d/83/a6/1d83a6d88d8be5b041a9a98fd5048311.jpg"
-          alt=""
-          className="w-32 h-44 object-cover rounded-3xl"/>
-     <div className="space-y-3">
-       <p className="font-bold text-xl">식당이름</p>
-       <p className="font-semibold text-lg text-gray-600">말이 필요 없는 서울 최고의 <br/>식당 중 하나</p>
-       <p className="text-gray-300">서울시 강남구 청담동</p>
-     </div>
-   </div>
- </div>
-
- <div>
-  <div className="text-2xl font-bold">LIST</div>
-  <img src="https://justsomething.co/wp-content/uploads/2020/07/meet-chestnut-the-cat-from-the-dad-joke-meme-the-internet-has-fallen-in-love-with-758x397.jpg" 
-       alt="" 
-       className="w-full h-60 object-cover rounded-t-md"
-      />
-   <div className="py-5 px-5 border border-gray-200 border-2 space-y-4 h-44 rounded-b-md">
-    <p className="font-semibold text-lg text-gray-700">삼성동 맛집 봉산집</p>
-    <div className="flex space-x-2 items-center">
-     <img src="https://fashionmagazine.com/wp-content/uploads/2016/10/national-cat-day-memes.png" 
-          alt=""
-          className="w-7 h-7 object-cover rounded-full"/>
-     <p className="font-medium text-gray-700">고기로드</p>
-    </div>
-    <div className="flex space-x-3">
-      <div className="rounded-3xl text-center text-gray-800 font-medium bg-gray-200 py-1 px-3">#만두</div>
-      <div className="rounded-3xl text-center text-gray-800 font-medium bg-gray-200 py-1 px-3">#일식</div>
-      <div className="rounded-3xl text-center text-gray-800 font-medium bg-gray-200 py-1 px-3">#신사동</div>
-      <div className="rounded-3xl text-center text-gray-800 font-medium bg-gray-200 py-1 px-3">#주변 맛집</div>
-      <div className="rounded-3xl text-center text-gray-800 font-medium bg-gray-200 py-1 px-3">#끄읕</div>
-    </div>
-
-   </div>
- </div>
-
-</div>;
+ );
 };
