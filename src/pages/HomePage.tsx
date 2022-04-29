@@ -4,6 +4,7 @@ import { MovieCard } from '../components/MovieCard';
 import { TextField } from '../components/TextField';
 import popularImg from '../assets/images/popcorn.png'
 import nowPlayingImg from '../assets/images/seats.jpeg'
+import upComing from '../assets/images/action.jpg'
 
 const API_KEY = '2eeb856217b288ecdb1aa544e2204095';
 
@@ -16,7 +17,8 @@ export type Category ={
 
 const CATEGORY_LIST = [
   {id: 0, label:'인기영화', url:'/popular', image: popularImg},
-  {id: 1, label:'현재 상영작', url:'/now_playing', image: nowPlayingImg},
+  {id: 1, label:'현재상영작', url:'/now_playing', image: nowPlayingImg},
+  {id: 2, label:'상영예정', url:'/upcoming', image: upComing},
   ];
 
 export type Movie = {
@@ -72,7 +74,7 @@ export type Movie = {
         <div className="space-y-4">
           <div className="text-2xl font-bold">Category</div>
 
-        <div className="flex space-x-3">
+        <div className="flex space-x-10">
           {CATEGORY_LIST.map((data) => <CategoryButton key={data.id} category={data} onClick={setCategory} isSelected={data.id === categoryIndex}/>)}
           </div>
         </div>
